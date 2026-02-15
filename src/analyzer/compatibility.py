@@ -110,7 +110,9 @@ class CompatibilityAnalyzer:
                 return True, "Same version (no upgrade needed)"
             
             # EKS requires sequential minor version upgrades
-            if to_minor - from_minor > 0.01:  # More than one minor version
+            # Allow for floating point precision by using a threshold
+            version_diff = to_minor - from_minor
+            if version_diff > 0.015:  # More than one minor version (accounting for float precision)
                 return False, "Cannot skip minor versions in EKS upgrade"
             
             return True, "Direct upgrade supported"
