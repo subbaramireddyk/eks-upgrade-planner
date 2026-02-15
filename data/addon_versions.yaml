@@ -1,0 +1,96 @@
+# EKS Addon Version Compatibility
+# Minimum and recommended addon versions per EKS version
+
+addons:
+  coredns:
+    description: "CoreDNS for cluster DNS"
+    critical: true
+    versions:
+      "1.27":
+        minimum: "v1.9.3-eksbuild.1"
+        recommended: "v1.10.1-eksbuild.1"
+      "1.28":
+        minimum: "v1.10.1-eksbuild.1"
+        recommended: "v1.10.1-eksbuild.2"
+      "1.29":
+        minimum: "v1.10.1-eksbuild.1"
+        recommended: "v1.11.1-eksbuild.1"
+      "1.30":
+        minimum: "v1.11.1-eksbuild.1"
+        recommended: "v1.11.1-eksbuild.2"
+  
+  kube-proxy:
+    description: "Kubernetes network proxy"
+    critical: true
+    versions:
+      "1.27":
+        minimum: "v1.27.1-eksbuild.1"
+        recommended: "v1.27.6-eksbuild.1"
+      "1.28":
+        minimum: "v1.28.1-eksbuild.1"
+        recommended: "v1.28.6-eksbuild.1"
+      "1.29":
+        minimum: "v1.29.0-eksbuild.1"
+        recommended: "v1.29.3-eksbuild.1"
+      "1.30":
+        minimum: "v1.30.0-eksbuild.1"
+        recommended: "v1.30.0-eksbuild.3"
+  
+  vpc-cni:
+    description: "Amazon VPC CNI plugin"
+    critical: true
+    versions:
+      "1.27":
+        minimum: "v1.12.0-eksbuild.1"
+        recommended: "v1.15.1-eksbuild.1"
+      "1.28":
+        minimum: "v1.13.0-eksbuild.1"
+        recommended: "v1.16.0-eksbuild.1"
+      "1.29":
+        minimum: "v1.14.0-eksbuild.1"
+        recommended: "v1.16.2-eksbuild.1"
+      "1.30":
+        minimum: "v1.16.0-eksbuild.1"
+        recommended: "v1.18.0-eksbuild.1"
+  
+  aws-ebs-csi-driver:
+    description: "Amazon EBS CSI driver"
+    critical: false
+    versions:
+      "1.27":
+        minimum: "v1.19.0-eksbuild.1"
+        recommended: "v1.25.0-eksbuild.1"
+      "1.28":
+        minimum: "v1.20.0-eksbuild.1"
+        recommended: "v1.26.0-eksbuild.1"
+      "1.29":
+        minimum: "v1.22.0-eksbuild.1"
+        recommended: "v1.27.0-eksbuild.1"
+      "1.30":
+        minimum: "v1.25.0-eksbuild.1"
+        recommended: "v1.28.0-eksbuild.1"
+  
+  aws-efs-csi-driver:
+    description: "Amazon EFS CSI driver"
+    critical: false
+    versions:
+      "1.27":
+        minimum: "v1.5.8-eksbuild.1"
+        recommended: "v1.7.0-eksbuild.1"
+      "1.28":
+        minimum: "v1.6.0-eksbuild.1"
+        recommended: "v1.7.1-eksbuild.1"
+      "1.29":
+        minimum: "v1.7.0-eksbuild.1"
+        recommended: "v1.7.4-eksbuild.1"
+      "1.30":
+        minimum: "v1.7.4-eksbuild.1"
+        recommended: "v2.0.0-eksbuild.1"
+
+# Addon upgrade order (priority)
+upgrade_order:
+  - vpc-cni       # Network must be stable first
+  - kube-proxy    # Core networking
+  - coredns       # DNS resolution
+  - aws-ebs-csi-driver  # Storage
+  - aws-efs-csi-driver  # Storage
