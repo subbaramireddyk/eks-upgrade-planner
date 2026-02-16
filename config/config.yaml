@@ -1,0 +1,37 @@
+# Default configuration for EKS Upgrade Planner
+
+aws:
+  default_region: "us-west-2"
+  profile: null  # Use default AWS profile
+
+kubernetes:
+  kubeconfig_path: "~/.kube/config"
+  context: null  # Use current context
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: null  # No file logging by default
+
+output:
+  default_format: "markdown"
+  colors_enabled: true
+
+cache:
+  enabled: true
+  ttl_hours: 24
+  directory: "~/.eks-upgrade-planner/cache"
+
+scan:
+  include_kubernetes: true
+  scan_all_namespaces: true
+
+analysis:
+  check_deprecated_apis: true
+  fetch_release_notes: true
+  include_breaking_changes: true
+
+reporting:
+  include_manifest_examples: true
+  max_examples: 5
+  include_detailed_steps: true
