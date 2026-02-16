@@ -1,0 +1,57 @@
+# EKS Version Compatibility Matrix
+# Maps EKS versions to supported Kubernetes versions and component compatibility
+
+eks_versions:
+  "1.27":
+    kubernetes_version: "1.27"
+    release_date: "2023-05-24"
+    end_of_support: "2024-07-01"
+    supported: true
+  
+  "1.28":
+    kubernetes_version: "1.28"
+    release_date: "2023-09-26"
+    end_of_support: "2024-11-01"
+    supported: true
+  
+  "1.29":
+    kubernetes_version: "1.29"
+    release_date: "2024-01-23"
+    end_of_support: "2025-03-23"
+    supported: true
+  
+  "1.30":
+    kubernetes_version: "1.30"
+    release_date: "2024-05-31"
+    end_of_support: "2025-07-31"
+    supported: true
+
+# AMI compatibility per EKS version
+ami_compatibility:
+  "1.27":
+    amazon_linux_2: "1.27"
+    bottlerocket: "1.27"
+    ubuntu: "1.27"
+  
+  "1.28":
+    amazon_linux_2: "1.28"
+    bottlerocket: "1.28"
+    ubuntu: "1.28"
+  
+  "1.29":
+    amazon_linux_2: "1.29"
+    amazon_linux_2023: "1.29"
+    bottlerocket: "1.29"
+    ubuntu: "1.29"
+  
+  "1.30":
+    amazon_linux_2: "1.30"
+    amazon_linux_2023: "1.30"
+    bottlerocket: "1.30"
+    ubuntu: "1.30"
+
+# Upgrade rules
+upgrade_rules:
+  max_version_skip: 0  # Cannot skip minor versions
+  sequential_upgrade_required: true
+  control_plane_before_nodes: true
