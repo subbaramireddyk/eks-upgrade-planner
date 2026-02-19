@@ -1,6 +1,15 @@
 """Setup configuration for eks-upgrade-planner."""
 
+import os
+import sys
 from setuptools import setup, find_packages
+
+# Add src to path to import version
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+try:
+    from src import __version__
+except ImportError:
+    __version__ = "1.0.0"  # Fallback
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
@@ -10,14 +19,13 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 
 setup(
     name="eks-upgrade-planner",
-    version="1.0.0",
+    version=__version__,
     author="EKS Upgrade Planner Contributors",
     description="A production-ready CLI tool for EKS cluster upgrade planning",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/subbaramireddyk/eks-upgrade-planner",
-    packages=find_packages(where="src"),
-    package_dir={"": "src"},
+    packages=find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
@@ -34,7 +42,7 @@ setup(
     install_requires=requirements,
     entry_points={
         "console_scripts": [
-            "eks-upgrade-planner=cli:main",
+            "eks-upgrade-planner=src.cli:main",
         ],
     },
     package_data={

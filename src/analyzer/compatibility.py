@@ -1,5 +1,8 @@
 """Compatibility analysis for EKS versions, addons, and APIs."""
 
+import os
+import yaml
+from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
 from ..utils.logger import get_logger
 
@@ -8,63 +11,140 @@ logger = get_logger(__name__)
 
 class CompatibilityAnalyzer:
     """Analyzer for version compatibility checks."""
-    
-    # EKS to Kubernetes version mapping
-    EKS_K8S_VERSIONS = {
-        '1.23': '1.23',
-        '1.24': '1.24',
-        '1.25': '1.25',
-        '1.26': '1.26',
-        '1.27': '1.27',
-        '1.28': '1.28',
-        '1.29': '1.29',
-        '1.30': '1.30',
-    }
-    
-    # Core addon minimum versions per EKS version
-    ADDON_COMPATIBILITY = {
-        '1.27': {
-            'coredns': ['v1.9.3-eksbuild.1', 'v1.10.1-eksbuild.1'],
-            'kube-proxy': ['v1.27.1-eksbuild.1', 'v1.27.6-eksbuild.1'],
-            'vpc-cni': ['v1.12.0-eksbuild.1', 'v1.15.1-eksbuild.1'],
-            'aws-ebs-csi-driver': ['v1.19.0-eksbuild.1', 'v1.25.0-eksbuild.1'],
-        },
-        '1.28': {
-            'coredns': ['v1.10.1-eksbuild.1', 'v1.10.1-eksbuild.2'],
-            'kube-proxy': ['v1.28.1-eksbuild.1', 'v1.28.6-eksbuild.1'],
-            'vpc-cni': ['v1.13.0-eksbuild.1', 'v1.16.0-eksbuild.1'],
-            'aws-ebs-csi-driver': ['v1.20.0-eksbuild.1', 'v1.26.0-eksbuild.1'],
-        },
-        '1.29': {
-            'coredns': ['v1.10.1-eksbuild.1', 'v1.11.1-eksbuild.1'],
-            'kube-proxy': ['v1.29.0-eksbuild.1', 'v1.29.3-eksbuild.1'],
-            'vpc-cni': ['v1.14.0-eksbuild.1', 'v1.16.2-eksbuild.1'],
-            'aws-ebs-csi-driver': ['v1.22.0-eksbuild.1', 'v1.27.0-eksbuild.1'],
-        },
-        '1.30': {
-            'coredns': ['v1.11.1-eksbuild.1', 'v1.11.1-eksbuild.2'],
-            'kube-proxy': ['v1.30.0-eksbuild.1', 'v1.30.0-eksbuild.3'],
-            'vpc-cni': ['v1.16.0-eksbuild.1', 'v1.18.0-eksbuild.1'],
-            'aws-ebs-csi-driver': ['v1.25.0-eksbuild.1', 'v1.28.0-eksbuild.1'],
-        },
-    }
-    
-    def __init__(self, compatibility_matrix: Optional[Dict] = None):
+
+    def __init__(self, compatibility_matrix: Optional[Dict] = None, addon_data: Optional[Dict] = None):
         """
         Initialize compatibility analyzer.
-        
+
         Args:
             compatibility_matrix: Optional custom compatibility matrix
+            addon_data: Optional custom addon version data
         """
-        self.compatibility_matrix = compatibility_matrix or {}
+        self.compatibility_matrix = compatibility_matrix or self._load_compatibility_matrix()
+        self.addon_data = addon_data or self._load_addon_data()
+
+        # Extract EKS to K8s version mapping from loaded data
+        self.EKS_K8S_VERSIONS = {}
+        if 'eks_versions' in self.compatibility_matrix:
+            for version, info in self.compatibility_matrix['eks_versions'].items():
+                self.EKS_K8S_VERSIONS[version] = info.get('kubernetes_version', version)
+
+        # Extract addon compatibility from loaded data
+        self.ADDON_COMPATIBILITY = self._build_addon_compatibility()
+
+    def _load_compatibility_matrix(self) -> Dict[str, Any]:
+        """Load compatibility matrix from YAML file."""
+        try:
+            # Find the data directory relative to this file
+            current_dir = Path(__file__).parent.parent.parent
+            data_file = current_dir / 'data' / 'compatibility_matrix.yaml'
+
+            if data_file.exists():
+                with open(data_file, 'r') as f:
+                    data = yaml.safe_load(f)
+                    logger.debug(f"Loaded compatibility matrix from {data_file}")
+                    return data
+            else:
+                logger.warning(f"Compatibility matrix file not found: {data_file}")
+                return {}
+        except Exception as e:
+            logger.error(f"Failed to load compatibility matrix: {e}")
+            return {}
+
+    def _load_addon_data(self) -> Dict[str, Any]:
+        """Load addon version data from YAML file."""
+        try:
+            # Find the data directory relative to this file
+            current_dir = Path(__file__).parent.parent.parent
+            data_file = current_dir / 'data' / 'addon_versions.yaml'
+
+            if data_file.exists():
+                with open(data_file, 'r') as f:
+                    data = yaml.safe_load(f)
+                    logger.debug(f"Loaded addon data from {data_file}")
+                    return data
+            else:
+                logger.warning(f"Addon data file not found: {data_file}")
+                return {}
+        except Exception as e:
+            logger.error(f"Failed to load addon data: {e}")
+            return {}
+
+    def _build_addon_compatibility(self) -> Dict[str, Dict[str, List[str]]]:
+        """Build addon compatibility dictionary from loaded YAML data."""
+        compatibility = {}
+
+        if 'addons' not in self.addon_data:
+            return compatibility
+
+        for addon_name, addon_info in self.addon_data['addons'].items():
+            if 'versions' not in addon_info:
+                continue
+
+            for eks_version, version_info in addon_info['versions'].items():
+                if eks_version not in compatibility:
+                    compatibility[eks_version] = {}
+
+                minimum = version_info.get('minimum', '')
+                recommended = version_info.get('recommended', '')
+
+                # Store as list with [minimum, recommended]
+                compatibility[eks_version][addon_name] = [minimum, recommended]
+
+        logger.debug(f"Built addon compatibility for {len(compatibility)} EKS versions")
+        return compatibility
     
+    def _validate_version_format(self, version: str) -> bool:
+        """
+        Validate EKS version format.
+
+        Args:
+            version: Version string to validate
+
+        Returns:
+            True if valid, False otherwise
+        """
+        if not version:
+            return False
+
+        # Check if version matches pattern like "1.27", "1.28", etc.
+        parts = version.split('.')
+        if len(parts) != 2:
+            return False
+
+        try:
+            major = int(parts[0])
+            minor = int(parts[1])
+            return major > 0 and minor >= 0
+        except ValueError:
+            return False
+
+    def _parse_version(self, version: str) -> Tuple[int, int]:
+        """
+        Parse version string into major and minor components.
+
+        Args:
+            version: Version string (e.g., "1.27")
+
+        Returns:
+            Tuple of (major, minor)
+
+        Raises:
+            ValueError: If version format is invalid
+        """
+        if not self._validate_version_format(version):
+            raise ValueError(f"Invalid version format: {version}")
+
+        parts = version.split('.')
+        return int(parts[0]), int(parts[1])
+
     def get_k8s_version(self, eks_version: str) -> Optional[str]:
         """
         Get Kubernetes version for an EKS version.
-        
+
         Args:
             eks_version: EKS version
-            
+
         Returns:
             Kubernetes version or None
         """
@@ -85,40 +165,54 @@ class CompatibilityAnalyzer:
     def can_upgrade_directly(self, from_version: str, to_version: str) -> Tuple[bool, str]:
         """
         Check if direct upgrade is possible between versions.
-        
+
         Args:
             from_version: Current EKS version
             to_version: Target EKS version
-            
+
         Returns:
             Tuple of (can_upgrade, reason)
         """
+        # Validate version formats
+        if not self._validate_version_format(from_version):
+            return False, f"Invalid source version format: {from_version}"
+
+        if not self._validate_version_format(to_version):
+            return False, f"Invalid target version format: {to_version}"
+
         if not self.is_version_supported(from_version):
             return False, f"Unsupported source version: {from_version}"
-        
+
         if not self.is_version_supported(to_version):
             return False, f"Unsupported target version: {to_version}"
-        
+
         try:
-            from_minor = float(from_version)
-            to_minor = float(to_version)
-            
-            if to_minor < from_minor:
+            from_major, from_minor = self._parse_version(from_version)
+            to_major, to_minor = self._parse_version(to_version)
+
+            # Compare versions
+            if to_major < from_major or (to_major == from_major and to_minor < from_minor):
                 return False, "Cannot downgrade EKS versions"
-            
-            if to_minor == from_minor:
+
+            if to_major == from_major and to_minor == from_minor:
                 return True, "Same version (no upgrade needed)"
-            
-            # EKS requires sequential minor version upgrades
-            # Allow for floating point precision by using a threshold
-            version_diff = to_minor - from_minor
-            if version_diff > 0.015:  # More than one minor version (accounting for float precision)
-                return False, "Cannot skip minor versions in EKS upgrade"
-            
-            return True, "Direct upgrade supported"
-            
-        except ValueError:
-            return False, "Invalid version format"
+
+            # EKS requires sequential minor version upgrades (can't skip versions)
+            # Check if versions are consecutive
+            if to_major == from_major:
+                # Same major version, check minor version difference
+                if to_minor - from_minor == 1:
+                    return True, "Direct upgrade supported"
+                elif to_minor - from_minor > 1:
+                    return False, "Cannot skip minor versions in EKS upgrade"
+                else:
+                    return True, "Direct upgrade supported"
+            else:
+                # Different major versions - not typical for EKS but handle it
+                return False, "Cannot upgrade across major versions"
+
+        except ValueError as e:
+            return False, f"Invalid version format: {e}"
     
     def check_addon_compatibility(
         self,
