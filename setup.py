@@ -11,11 +11,26 @@ try:
 except ImportError:
     __version__ = "1.0.0"  # Fallback
 
-with open("README.md", "r", encoding="utf-8") as fh:
-    long_description = fh.read()
+try:
+    with open("README.md", "r", encoding="utf-8") as fh:
+        long_description = fh.read()
+except FileNotFoundError:
+    long_description = "EKS Upgrade Planner - A production-ready CLI tool for EKS cluster upgrade planning"
 
-with open("requirements.txt", "r", encoding="utf-8") as fh:
-    requirements = [line.strip() for line in fh if line.strip() and not line.startswith("#")]
+try:
+    with open("requirements.txt", "r", encoding="utf-8") as fh:
+        requirements = [line.strip() for line in fh if line.strip() and not line.startswith("#")]
+except FileNotFoundError:
+    requirements = [
+        "boto3>=1.34.0",
+        "kubernetes>=28.1.0",
+        "click>=8.1.0",
+        "pyyaml>=6.0",
+        "requests>=2.31.0",
+        "beautifulsoup4>=4.12.0",
+        "jinja2>=3.1.0",
+        "rich>=13.0.0",
+    ]
 
 setup(
     name="eks-upgrade-planner",

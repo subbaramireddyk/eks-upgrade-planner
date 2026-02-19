@@ -1,0 +1,11 @@
+include README.md
+include LICENSE
+include requirements.txt
+include requirements-dev.txt
+recursive-include data *.yaml *.yml
+recursive-include config *.yaml *.yml
+recursive-include src *.py
+recursive-exclude tests *
+recursive-exclude .github *
+recursive-exclude examples *
+recursive-exclude docs *
