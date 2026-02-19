@@ -5,7 +5,7 @@ from .risk_assessment import RiskAssessment
 from .migration_plan import MigrationPlanner
 
 __all__ = [
-    'UpgradePathPlanner',
-    'RiskAssessment',
-    'MigrationPlanner',
+    "UpgradePathPlanner",
+    "RiskAssessment",
+    "MigrationPlanner",
 ]

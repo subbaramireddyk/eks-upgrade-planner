@@ -5,7 +5,7 @@ from .deprecation import DeprecationAnalyzer
 from .release_notes import ReleaseNotesAnalyzer
 
 __all__ = [
-    'CompatibilityAnalyzer',
-    'DeprecationAnalyzer',
-    'ReleaseNotesAnalyzer',
+    "CompatibilityAnalyzer",
+    "DeprecationAnalyzer",
+    "ReleaseNotesAnalyzer",
 ]

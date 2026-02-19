@@ -9,11 +9,11 @@ logger = get_logger(__name__)
 
 class HTMLReporter:
     """Generate HTML format upgrade reports."""
-    
+
     def __init__(self):
         """Initialize HTML reporter."""
         pass
-    
+
     def generate_report(
         self,
         cluster_info: Dict[str, Any],
@@ -21,11 +21,11 @@ class HTMLReporter:
         analysis_results: Dict[str, Any],
         upgrade_plan: Dict[str, Any],
         risk_assessment: Dict[str, Any],
-        migration_plan: Dict[str, Any]
+        migration_plan: Dict[str, Any],
     ) -> str:
         """
         Generate comprehensive HTML upgrade report.
-        
+
         Args:
             cluster_info: Cluster information
             scan_results: Scan results
@@ -33,27 +33,31 @@ class HTMLReporter:
             upgrade_plan: Upgrade plan
             risk_assessment: Risk assessment
             migration_plan: Migration plan
-            
+
         Returns:
             HTML formatted report
         """
         logger.info("Generating HTML report")
-        
-        cluster = cluster_info.get('cluster', {})
-        cluster_name = cluster.get('name', 'Unknown')
-        current_version = cluster.get('version', 'Unknown')
-        target_version = upgrade_plan.get('upgrade_path', [])[-1] if upgrade_plan.get('upgrade_path') else 'Unknown'
-        risk_level = risk_assessment.get('overall_risk', 'UNKNOWN')
-        
+
+        cluster = cluster_info.get("cluster", {})
+        cluster_name = cluster.get("name", "Unknown")
+        current_version = cluster.get("version", "Unknown")
+        target_version = (
+            upgrade_plan.get("upgrade_path", [])[-1]
+            if upgrade_plan.get("upgrade_path")
+            else "Unknown"
+        )
+        risk_level = risk_assessment.get("overall_risk", "UNKNOWN")
+
         # Risk level color
         risk_colors = {
-            'LOW': '#28a745',
-            'MEDIUM': '#ffc107',
-            'HIGH': '#fd7e14',
-            'CRITICAL': '#dc3545',
+            "LOW": "#28a745",
+            "MEDIUM": "#ffc107",
+            "HIGH": "#fd7e14",
+            "CRITICAL": "#dc3545",
         }
-        risk_color = risk_colors.get(risk_level, '#6c757d')
-        
+        risk_color = risk_colors.get(risk_level, "#6c757d")
+
         html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -111,10 +115,10 @@ class HTMLReporter:
     </div>
 </body>
 </html>"""
-        
+
         logger.info("HTML report generated successfully")
         return html
-    
+
     def _get_css(self) -> str:
         """Get CSS styling for HTML report."""
         return """
@@ -280,18 +284,18 @@ class HTMLReporter:
             font-family: 'Courier New', monospace;
         }
         """
-    
+
     def _generate_summary_section(
         self,
         cluster_info: Dict[str, Any],
         upgrade_plan: Dict[str, Any],
-        risk_assessment: Dict[str, Any]
+        risk_assessment: Dict[str, Any],
     ) -> str:
         """Generate executive summary section."""
-        cluster = cluster_info.get('cluster', {})
-        upgrade_path = upgrade_plan.get('upgrade_path', [])
-        time_est = upgrade_plan.get('time_estimation', {})
-        
+        cluster = cluster_info.get("cluster", {})
+        upgrade_path = upgrade_plan.get("upgrade_path", [])
+        time_est = upgrade_plan.get("time_estimation", {})
+
         return f"""
         <section id="summary">
             <h2>Executive Summary</h2>
@@ -304,16 +308,16 @@ class HTMLReporter:
             </ul>
         </section>
         """
-    
+
     def _generate_current_state_section(self, cluster_info: Dict[str, Any]) -> str:
         """Generate current state section."""
-        cluster = cluster_info.get('cluster', {})
-        node_groups = cluster_info.get('node_groups', [])
-        addons = cluster_info.get('addons', [])
-        
+        cluster = cluster_info.get("cluster", {})
+        node_groups = cluster_info.get("node_groups", [])
+        addons = cluster_info.get("addons", [])
+
         ng_table = self._generate_node_groups_table(node_groups)
         addon_table = self._generate_addons_table(addons)
-        
+
         return f"""
         <section id="current-state">
             <h2>Current State</h2>
@@ -332,20 +336,20 @@ class HTMLReporter:
             {addon_table}
         </section>
         """
-    
+
     def _generate_node_groups_table(self, node_groups) -> str:
         """Generate node groups table."""
         if not node_groups:
             return "<p>No node groups found.</p>"
-        
+
         rows = ""
         for ng in node_groups:
-            name = ng.get('name', 'N/A')
-            version = ng.get('version', 'N/A')
-            ami_type = ng.get('ami_type', 'N/A')
-            desired = ng.get('scaling_config', {}).get('desiredSize', 0)
-            instances = ', '.join(ng.get('instance_types', ['N/A'])[:2])
-            
+            name = ng.get("name", "N/A")
+            version = ng.get("version", "N/A")
+            ami_type = ng.get("ami_type", "N/A")
+            desired = ng.get("scaling_config", {}).get("desiredSize", 0)
+            instances = ", ".join(ng.get("instance_types", ["N/A"])[:2])
+
             rows += f"""
             <tr>
                 <td>{name}</td>
@@ -355,7 +359,7 @@ class HTMLReporter:
                 <td>{instances}</td>
             </tr>
             """
-        
+
         return f"""
         <table>
             <thead>
@@ -372,18 +376,18 @@ class HTMLReporter:
             </tbody>
         </table>
         """
-    
+
     def _generate_addons_table(self, addons) -> str:
         """Generate addons table."""
         if not addons:
             return "<p>No addons installed.</p>"
-        
+
         rows = ""
         for addon in addons:
-            name = addon.get('name', 'N/A')
-            version = addon.get('version', 'N/A')
-            status = addon.get('status', 'N/A')
-            
+            name = addon.get("name", "N/A")
+            version = addon.get("version", "N/A")
+            status = addon.get("status", "N/A")
+
             rows += f"""
             <tr>
                 <td>{name}</td>
@@ -391,7 +395,7 @@ class HTMLReporter:
                 <td>{status}</td>
             </tr>
             """
-        
+
         return f"""
         <table>
             <thead>
@@ -406,25 +410,25 @@ class HTMLReporter:
             </tbody>
         </table>
         """
-    
+
     def _generate_upgrade_path_section(self, upgrade_plan: Dict[str, Any]) -> str:
         """Generate upgrade path section."""
-        upgrade_path = upgrade_plan.get('upgrade_path', [])
-        
+        upgrade_path = upgrade_plan.get("upgrade_path", [])
+
         if not upgrade_path or len(upgrade_path) < 2:
             return '<section id="upgrade-path"><h2>Upgrade Path</h2><p>No upgrade needed.</p></section>'
-        
+
         steps = ""
         for i, version in enumerate(upgrade_path, 1):
             if i == 1:
                 steps += f"<li><strong>Current:</strong> EKS {version}</li>"
             else:
                 steps += f"<li>✅ Upgrade to EKS {version}</li>"
-        
+
         warning = ""
         if len(upgrade_path) > 2:
             warning = '<div class="warning">⚠️ <strong>Note:</strong> Cannot skip minor versions - sequential upgrades required</div>'
-        
+
         return f"""
         <section id="upgrade-path">
             <h2>Upgrade Path</h2>
@@ -434,29 +438,27 @@ class HTMLReporter:
             {warning}
         </section>
         """
-    
+
     def _generate_requirements_section(
-        self,
-        upgrade_plan: Dict[str, Any],
-        analysis_results: Dict[str, Any]
+        self, upgrade_plan: Dict[str, Any], analysis_results: Dict[str, Any]
     ) -> str:
         """Generate pre-upgrade requirements section."""
-        addon_recs = analysis_results.get('addon_recommendations', [])
-        
+        addon_recs = analysis_results.get("addon_recommendations", [])
+
         items = ""
         for addon in addon_recs:
-            if addon.get('action_required'):
-                current = addon.get('current_version', 'Unknown')
-                recommended = addon.get('recommended_version', 'Unknown')
+            if addon.get("action_required"):
+                current = addon.get("current_version", "Unknown")
+                recommended = addon.get("recommended_version", "Unknown")
                 items += f"<li>Update {addon.get('addon_name')}: {current} → {recommended}</li>"
-        
+
         items += """
         <li>Backup cluster configuration and data</li>
         <li>Test upgrade in staging environment</li>
         <li>Review breaking changes documentation</li>
         <li>Prepare rollback plan</li>
         """
-        
+
         return f"""
         <section id="requirements">
             <h2>Pre-Upgrade Requirements</h2>
@@ -465,60 +467,66 @@ class HTMLReporter:
             </ul>
         </section>
         """
-    
-    def _generate_deprecated_apis_section(self, analysis_results: Dict[str, Any]) -> str:
+
+    def _generate_deprecated_apis_section(
+        self, analysis_results: Dict[str, Any]
+    ) -> str:
         """Generate deprecated APIs section."""
-        deprecated_apis = analysis_results.get('deprecated_apis', {})
-        
+        deprecated_apis = analysis_results.get("deprecated_apis", {})
+
         if not deprecated_apis:
             return '<section id="deprecated"><h2>Deprecated APIs</h2><div class="success">✅ No deprecated APIs found</div></section>'
-        
+
         total_count = sum(len(resources) for resources in deprecated_apis.values())
-        
+
         content = f'<div class="warning">⚠️ {total_count} resources using deprecated APIs</div>'
-        
+
         for api_version, resources in list(deprecated_apis.items())[:5]:  # Limit to 5
-            deprecation_info = resources[0].get('deprecation_info', {}) if resources else {}
-            replacement = deprecation_info.get('replacement', 'N/A')
-            removed_in = deprecation_info.get('removed_in', 'N/A')
-            
+            deprecation_info = (
+                resources[0].get("deprecation_info", {}) if resources else {}
+            )
+            replacement = deprecation_info.get("replacement", "N/A")
+            removed_in = deprecation_info.get("removed_in", "N/A")
+
             content += f"""
             <h3>{api_version} (removed in {removed_in})</h3>
             <p><strong>Replacement:</strong> {replacement}</p>
             <ul>
             """
-            
+
             for resource in resources[:5]:  # Limit to 5 per API version
-                name = resource.get('name', 'Unknown')
-                kind = resource.get('kind', 'Unknown')
-                ns = resource.get('namespace', 'default')
+                name = resource.get("name", "Unknown")
+                kind = resource.get("kind", "Unknown")
+                ns = resource.get("namespace", "default")
                 content += f"<li>{kind} <code>{name}</code> in namespace <code>{ns}</code></li>"
-            
+
             content += "</ul>"
-        
+
         return f"""
         <section id="deprecated">
             <h2>Deprecated APIs Found</h2>
             {content}
         </section>
         """
-    
-    def _generate_breaking_changes_section(self, analysis_results: Dict[str, Any]) -> str:
+
+    def _generate_breaking_changes_section(
+        self, analysis_results: Dict[str, Any]
+    ) -> str:
         """Generate breaking changes section."""
-        breaking_changes = analysis_results.get('breaking_changes', [])
-        
+        breaking_changes = analysis_results.get("breaking_changes", [])
+
         if not breaking_changes:
             return '<section id="breaking"><h2>Breaking Changes</h2><div class="success">✅ No breaking changes identified</div></section>'
-        
+
         content = ""
         for change in breaking_changes[:10]:  # Limit to 10
-            impact = change.get('impact', 'UNKNOWN')
-            title = change.get('title', 'Unknown')
-            description = change.get('description', '')
-            action = change.get('action', 'Review manually')
-            
-            css_class = 'danger' if impact == 'HIGH' else 'warning'
-            
+            impact = change.get("impact", "UNKNOWN")
+            title = change.get("title", "Unknown")
+            description = change.get("description", "")
+            action = change.get("action", "Review manually")
+
+            css_class = "danger" if impact == "HIGH" else "warning"
+
             content += f"""
             <div class="{css_class}">
                 <h3>[{impact}] {title}</h3>
@@ -526,22 +534,22 @@ class HTMLReporter:
                 <p><strong>Action Required:</strong> {action}</p>
             </div>
             """
-        
+
         return f"""
         <section id="breaking">
             <h2>Breaking Changes</h2>
             {content}
         </section>
         """
-    
+
     def _generate_migration_section(self, migration_plan: Dict[str, Any]) -> str:
         """Generate migration requirements section."""
-        if not migration_plan.get('migration_required'):
+        if not migration_plan.get("migration_required"):
             return '<section id="migration"><h2>Migration Requirements</h2><div class="success">✅ No migrations required</div></section>'
-        
-        critical = migration_plan.get('critical_migrations', 0)
-        total = migration_plan.get('total_resources_affected', 0)
-        
+
+        critical = migration_plan.get("critical_migrations", 0)
+        total = migration_plan.get("total_resources_affected", 0)
+
         return f"""
         <section id="migration">
             <h2>Migration Requirements</h2>
@@ -551,20 +559,20 @@ class HTMLReporter:
             </div>
         </section>
         """
-    
+
     def _generate_steps_section(self, upgrade_plan: Dict[str, Any]) -> str:
         """Generate detailed upgrade steps section."""
-        runbook = upgrade_plan.get('runbook', {})
-        phases = runbook.get('phases', [])
-        
+        runbook = upgrade_plan.get("runbook", {})
+        phases = runbook.get("phases", [])
+
         content = ""
         for i, phase in enumerate(phases, 1):
-            phase_name = phase.get('phase', f'Phase {i}')
-            duration = phase.get('duration', 'Unknown')
-            steps = phase.get('steps', [])
-            
+            phase_name = phase.get("phase", f"Phase {i}")
+            duration = phase.get("duration", "Unknown")
+            steps = phase.get("steps", [])
+
             steps_html = "".join(f"<li>{step}</li>" for step in steps)
-            
+
             content += f"""
             <h3>Phase {i}: {phase_name}</h3>
             <p><strong>Estimated Duration:</strong> {duration}</p>
@@ -572,23 +580,25 @@ class HTMLReporter:
                 {steps_html}
             </ol>
             """
-        
+
         return f"""
         <section id="steps">
             <h2>Detailed Upgrade Steps</h2>
             {content}
         </section>
         """
-    
+
     def _generate_risk_section(self, risk_assessment: Dict[str, Any]) -> str:
         """Generate risk assessment section."""
-        risk_level = risk_assessment.get('overall_risk', 'UNKNOWN')
-        risk_factors = risk_assessment.get('risk_factors', [])
-        mitigations = risk_assessment.get('mitigation_strategies', [])
-        
+        risk_level = risk_assessment.get("overall_risk", "UNKNOWN")
+        risk_factors = risk_assessment.get("risk_factors", [])
+        mitigations = risk_assessment.get("mitigation_strategies", [])
+
         risk_factors_html = "".join(f"<li>{factor}</li>" for factor in risk_factors)
-        mitigations_html = "".join(f"<li>{mitigation}</li>" for mitigation in mitigations)
-        
+        mitigations_html = "".join(
+            f"<li>{mitigation}</li>" for mitigation in mitigations
+        )
+
         return f"""
         <section id="risk">
             <h2>Risk Assessment</h2>
@@ -605,7 +615,7 @@ class HTMLReporter:
             </ol>
         </section>
         """
-    
+
     def _generate_rollback_section(self) -> str:
         """Generate rollback plan section."""
         return """
@@ -632,17 +642,17 @@ class HTMLReporter:
             </ol>
         </section>
         """
-    
+
     def _generate_timeline_section(self, upgrade_plan: Dict[str, Any]) -> str:
         """Generate estimated timeline section."""
-        time_est = upgrade_plan.get('time_estimation', {})
-        breakdown = time_est.get('breakdown', {})
-        
+        time_est = upgrade_plan.get("time_estimation", {})
+        breakdown = time_est.get("breakdown", {})
+
         breakdown_html = ""
         for category, time in breakdown.items():
-            formatted_category = category.replace('_', ' ').title()
+            formatted_category = category.replace("_", " ").title()
             breakdown_html += f"<li><strong>{formatted_category}:</strong> {time}</li>"
-        
+
         return f"""
         <section id="timeline">
             <h2>Estimated Timeline</h2>
