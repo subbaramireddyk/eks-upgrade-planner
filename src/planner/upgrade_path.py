@@ -26,42 +26,55 @@ class UpgradePathPlanner:
     ) -> List[str]:
         """
         Generate sequential upgrade path from current to target version.
-        
+
         Args:
             current_version: Current EKS version
             target_version: Target EKS version
-            
+
         Returns:
             List of versions in upgrade sequence
         """
         logger.info(f"Generating upgrade path: {current_version} -> {target_version}")
-        
+
         try:
-            current = float(current_version)
-            target = float(target_version)
-            
-            if current >= target:
+            # Parse versions as major.minor
+            current_parts = current_version.split('.')
+            target_parts = target_version.split('.')
+
+            if len(current_parts) != 2 or len(target_parts) != 2:
+                logger.error("Invalid version format")
+                return [current_version]
+
+            current_major = int(current_parts[0])
+            current_minor = int(current_parts[1])
+            target_major = int(target_parts[0])
+            target_minor = int(target_parts[1])
+
+            # Check if already at or beyond target
+            if (current_major > target_major or
+                (current_major == target_major and current_minor >= target_minor)):
                 logger.warning("Current version is already at or beyond target")
                 return [current_version]
-            
+
             # Generate sequential path (can't skip minor versions in EKS)
             path = [current_version]
-            current_step = current
-            
-            while current_step < target:
-                # Increment by 0.01 to get next minor version
-                next_step = round(current_step + 0.01, 2)
-                if next_step <= target:
-                    path.append(f"{next_step:.2f}".rstrip('0').rstrip('.'))
-                    current_step = next_step
-                else:
-                    break
-            
+
+            # Only handle same major version upgrades (typical for EKS)
+            if current_major == target_major:
+                for minor in range(current_minor + 1, target_minor + 1):
+                    path.append(f"{current_major}.{minor}")
+            else:
+                # Handle cross-major version (rare for EKS)
+                logger.warning("Cross-major version upgrade detected")
+                # First upgrade to latest minor in current major
+                # Then to target (this is simplified and may need refinement)
+                path.append(target_version)
+
             logger.info(f"Generated upgrade path: {' → '.join(path)}")
             return path
-            
-        except ValueError:
-            logger.error("Invalid version format")
+
+        except (ValueError, IndexError) as e:
+            logger.error(f"Failed to generate upgrade path: {e}")
             return [current_version]
     
     def determine_addon_upgrade_order(

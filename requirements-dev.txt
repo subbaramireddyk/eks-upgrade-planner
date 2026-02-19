@@ -1,0 +1,24 @@
+# Development dependencies for EKS Upgrade Planner
+
+# Include production dependencies
+-r requirements.txt
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-mock>=3.11.0
+
+# Code quality
+flake8>=6.1.0
+black>=23.7.0
+isort>=5.12.0
+mypy>=1.5.0
+
+# Type stubs
+boto3-stubs[eks,ec2,sts]>=1.28.0
+types-PyYAML>=6.0.12
+types-requests>=2.31.0
+
+# Build tools
+build>=1.0.0
+twine>=4.0.0
