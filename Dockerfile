@@ -1,5 +1,5 @@
 # Multi-stage build for EKS Upgrade Planner
-FROM python:3.11-slim as builder
+FROM python:3.11-slim AS builder
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -11,6 +11,9 @@ WORKDIR /app
 # Copy requirements and install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt
+
+# Install setuptools and wheel for building the package
+RUN pip install --no-cache-dir --user setuptools wheel
 
 # Final stage
 FROM python:3.11-slim
@@ -46,8 +49,10 @@ COPY src/ ./src/
 COPY data/ ./data/
 COPY config/ ./config/
 COPY setup.py .
+COPY pyproject.toml .
 COPY requirements.txt .
 COPY README.md .
+COPY LICENSE .
 
 # Set ownership
 RUN chown -R eksplanner:eksplanner /app
@@ -58,8 +63,8 @@ USER eksplanner
 # Add local bin to PATH
 ENV PATH=/home/eksplanner/.local/bin:$PATH
 
-# Install package
-RUN pip install --no-cache-dir --user -e .
+# Install package in non-editable mode (editable doesn't work well in containers)
+RUN pip install --no-cache-dir --user .
 
 ENTRYPOINT ["eks-upgrade-planner"]
 CMD ["--help"]
