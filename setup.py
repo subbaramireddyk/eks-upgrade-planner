@@ -25,7 +25,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/subbaramireddyk/eks-upgrade-planner",
-    packages=find_packages(),
+    packages=find_packages(include=['src', 'src.*']),
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",

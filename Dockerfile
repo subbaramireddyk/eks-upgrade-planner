@@ -56,7 +56,6 @@ USER eksplanner
 
 # Add local bin to PATH
 ENV PATH=/home/eksplanner/.local/bin:$PATH
-ENV PYTHONPATH=/app/src:$PYTHONPATH
 
 # Install package
 RUN pip install --no-cache-dir --user -e .
