@@ -6,11 +6,11 @@ import os
 from pathlib import Path
 from typing import Optional
 
-from .utils import setup_logger, get_logger, AWSHelper, K8sHelper, Cache
-from .scanner import EKSScanner, K8sScanner
-from .analyzer import CompatibilityAnalyzer, DeprecationAnalyzer, ReleaseNotesAnalyzer
-from .planner import UpgradePathPlanner, RiskAssessment, MigrationPlanner
-from .reporter import MarkdownReporter, JSONExporter, HTMLReporter
+from src.utils import setup_logger, get_logger, AWSHelper, K8sHelper, Cache
+from src.scanner import EKSScanner, K8sScanner
+from src.analyzer import CompatibilityAnalyzer, DeprecationAnalyzer, ReleaseNotesAnalyzer
+from src.planner import UpgradePathPlanner, RiskAssessment, MigrationPlanner
+from src.reporter import MarkdownReporter, JSONExporter, HTMLReporter
 
 logger = None
 
@@ -417,7 +417,7 @@ def check_addon(ctx, addon, current, eks_version):
 @click.pass_context
 def version(ctx):
     """Show version information."""
-    from . import __version__
+    from src import __version__
 
     click.echo(f"EKS Upgrade Planner v{__version__}")
 
