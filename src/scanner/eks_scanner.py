@@ -2,8 +2,8 @@
 
 from typing import Dict, Any, List, Optional
 from botocore.exceptions import ClientError
-from ..utils.logger import get_logger
-from ..utils.aws_helper import AWSHelper
+from src.utils.logger import get_logger
+from src.utils.aws_helper import AWSHelper
 
 logger = get_logger(__name__)
 
