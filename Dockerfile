@@ -50,21 +50,22 @@ COPY data/ ./data/
 COPY config/ ./config/
 COPY setup.py .
 COPY pyproject.toml .
+COPY MANIFEST.in .
 COPY requirements.txt .
 COPY README.md .
 COPY LICENSE .
 
-# Set ownership
+# Install package as root first (avoid permission issues)
+RUN pip install --no-cache-dir .
+
+# Set ownership after installation
 RUN chown -R eksplanner:eksplanner /app
 
 # Switch to non-root user
 USER eksplanner
 
 # Add local bin to PATH
-ENV PATH=/home/eksplanner/.local/bin:$PATH
-
-# Install package in non-editable mode (editable doesn't work well in containers)
-RUN pip install --no-cache-dir --user .
+ENV PATH=/usr/local/bin:$PATH
 
 ENTRYPOINT ["eks-upgrade-planner"]
 CMD ["--help"]
