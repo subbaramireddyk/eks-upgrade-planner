@@ -5,7 +5,11 @@ __author__ = "EKS Upgrade Planner Contributors"
 
 from src.utils import setup_logger, get_logger
 from src.scanner import EKSScanner, K8sScanner
-from src.analyzer import CompatibilityAnalyzer, DeprecationAnalyzer, ReleaseNotesAnalyzer
+from src.analyzer import (
+    CompatibilityAnalyzer,
+    DeprecationAnalyzer,
+    ReleaseNotesAnalyzer,
+)
 from src.planner import UpgradePathPlanner, RiskAssessment, MigrationPlanner
 from src.reporter import MarkdownReporter, JSONExporter, HTMLReporter
 
