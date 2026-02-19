@@ -5,7 +5,7 @@ from .json_export import JSONExporter
 from .html import HTMLReporter
 
 __all__ = [
-    'MarkdownReporter',
-    'JSONExporter',
-    'HTMLReporter',
+    "MarkdownReporter",
+    "JSONExporter",
+    "HTMLReporter",
 ]

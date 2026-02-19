@@ -4,6 +4,6 @@ from .eks_scanner import EKSScanner
 from .k8s_scanner import K8sScanner
 
 __all__ = [
-    'EKSScanner',
-    'K8sScanner',
+    "EKSScanner",
+    "K8sScanner",
 ]
