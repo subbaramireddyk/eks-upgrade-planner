@@ -1,43 +1,27 @@
 # -*- mode: python ; coding: utf-8 -*-
+from PyInstaller.utils.hooks import collect_submodules, collect_data_files
 
 block_cipher = None
+
+# Collect all submodules from the src package
+hiddenimports = collect_submodules('src')
+
+# Collect data files from src package (YAML config files, etc.)
+datas = collect_data_files('src')
+
+# Add our data and config directories
+datas += [
+    ('data', 'data'),
+    ('config', 'config'),
+]
 
 a = Analysis(
     ['build_entry.py'],
     pathex=[],
     binaries=[],
-    datas=[
-        ('data', 'data'),
-        ('config', 'config'),
-    ],
-    hiddenimports=[
-        'src',
-        'src.cli',
-        'src.utils',
-        'src.utils.logger',
-        'src.utils.aws_helper',
-        'src.utils.k8s_helper',
-        'src.utils.cache',
-        'src.scanner',
-        'src.scanner.eks_scanner',
-        'src.scanner.k8s_scanner',
-        'src.analyzer',
-        'src.analyzer.compatibility',
-        'src.analyzer.deprecation',
-        'src.analyzer.release_notes',
-        'src.planner',
-        'src.planner.upgrade_path',
-        'src.planner.risk_assessment',
-        'src.planner.migration_plan',
-        'src.reporter',
-        'src.reporter.markdown',
-        'src.reporter.json_export',
-        'src.reporter.html',
-        'boto3',
-        'botocore',
-        'kubernetes',
-        'yaml',
-        'click',
+    datas=datas,
+    hiddenimports=hiddenimports + [
+        'pkg_resources.py2_warn',
     ],
     hookspath=[],
     hooksconfig={},
