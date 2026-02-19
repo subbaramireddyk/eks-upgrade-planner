@@ -8,7 +8,11 @@ from typing import Optional
 
 from src.utils import setup_logger, get_logger, AWSHelper, K8sHelper, Cache
 from src.scanner import EKSScanner, K8sScanner
-from src.analyzer import CompatibilityAnalyzer, DeprecationAnalyzer, ReleaseNotesAnalyzer
+from src.analyzer import (
+    CompatibilityAnalyzer,
+    DeprecationAnalyzer,
+    ReleaseNotesAnalyzer,
+)
 from src.planner import UpgradePathPlanner, RiskAssessment, MigrationPlanner
 from src.reporter import MarkdownReporter, JSONExporter, HTMLReporter
 
