@@ -3,8 +3,8 @@
 import requests
 from bs4 import BeautifulSoup
 from typing import Dict, Any, List, Optional
-from ..utils.logger import get_logger
-from ..utils.cache import Cache
+from src.utils.logger import get_logger
+from src.utils.cache import Cache
 
 logger = get_logger(__name__)
 

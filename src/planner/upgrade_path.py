@@ -1,8 +1,8 @@
 """Upgrade path planning for EKS clusters."""
 
 from typing import Dict, Any, List, Optional, Tuple
-from ..utils.logger import get_logger
-from ..analyzer.compatibility import CompatibilityAnalyzer
+from src.utils.logger import get_logger
+from src.analyzer.compatibility import CompatibilityAnalyzer
 
 logger = get_logger(__name__)
 

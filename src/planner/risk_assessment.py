@@ -1,7 +1,7 @@
 """Risk assessment for EKS upgrades."""
 
 from typing import Dict, Any, List, Optional
-from ..utils.logger import get_logger
+from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
 

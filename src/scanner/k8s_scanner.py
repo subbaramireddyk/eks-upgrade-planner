@@ -2,8 +2,8 @@
 
 from typing import Dict, Any, List, Optional
 from collections import defaultdict
-from ..utils.logger import get_logger
-from ..utils.k8s_helper import K8sHelper
+from src.utils.logger import get_logger
+from src.utils.k8s_helper import K8sHelper
 
 try:
     from kubernetes.client.exceptions import ApiException

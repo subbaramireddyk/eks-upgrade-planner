@@ -3,7 +3,7 @@
 import boto3
 from typing import Optional, Dict, Any
 from botocore.exceptions import ClientError, BotoCoreError, NoCredentialsError
-from .logger import get_logger
+from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
