@@ -41,7 +41,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Contributors
 - EKS Upgrade Planner Contributors
-- Co-Authored-By: Claude Opus 4.6
 
 [Unreleased]: https://github.com/subbaramireddyk/eks-upgrade-planner/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/subbaramireddyk/eks-upgrade-planner/releases/tag/v1.0.0

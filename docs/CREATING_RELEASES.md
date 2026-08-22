@@ -166,8 +166,6 @@ None reported yet! Please report issues at https://github.com/subbaramireddyk/ek
 ### 🙏 Credits
 
 Built with ❤️ by EKS Upgrade Planner Contributors
-
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 ```
 
 ---
