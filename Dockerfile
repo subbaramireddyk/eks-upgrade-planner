@@ -46,8 +46,6 @@ COPY --from=builder /root/.local /home/eksplanner/.local
 
 # Copy application code
 COPY src/ ./src/
-COPY data/ ./data/
-COPY config/ ./config/
 COPY setup.py .
 COPY pyproject.toml .
 COPY MANIFEST.in .

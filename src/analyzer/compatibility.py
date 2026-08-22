@@ -7,6 +7,34 @@ from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
+# The "src" package directory. Bundled YAML lives in src/data/ so that it is
+# installed alongside the code by pip and picked up by PyInstaller, rather than
+# being looked for next to the repository root (which does not exist once the
+# package is installed).
+_PACKAGE_ROOT = Path(__file__).resolve().parent.parent
+
+
+def _find_data_file(filename: str) -> Optional[Path]:
+    """
+    Locate a bundled data file.
+
+    Args:
+        filename: Name of the file inside the data directory
+
+    Returns:
+        Path to the file, or None if it cannot be found
+    """
+    candidates = (
+        # Installed / normal layout: the data ships inside the package.
+        _PACKAGE_ROOT / "data" / filename,
+        # Legacy layout: data/ sitting next to the package in an old checkout.
+        _PACKAGE_ROOT.parent / "data" / filename,
+    )
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    return None
+
 
 class CompatibilityAnalyzer:
     """Analyzer for version compatibility checks."""
@@ -38,41 +66,45 @@ class CompatibilityAnalyzer:
         self.ADDON_COMPATIBILITY = self._build_addon_compatibility()
 
     def _load_compatibility_matrix(self) -> Dict[str, Any]:
-        """Load compatibility matrix from YAML file."""
-        try:
-            # Find the data directory relative to this file
-            current_dir = Path(__file__).parent.parent.parent
-            data_file = current_dir / "data" / "compatibility_matrix.yaml"
+        """Load compatibility matrix from the bundled YAML file."""
+        data_file = _find_data_file("compatibility_matrix.yaml")
 
-            if data_file.exists():
-                with open(data_file, "r") as f:
-                    data = yaml.safe_load(f)
-                    logger.debug(f"Loaded compatibility matrix from {data_file}")
-                    return data
-            else:
-                logger.warning(f"Compatibility matrix file not found: {data_file}")
-                return {}
+        if data_file is None:
+            logger.error(
+                "Bundled data file %s could not be found. The installation looks "
+                "incomplete - reinstall the package, or run from a source checkout.",
+                "compatibility_matrix.yaml",
+            )
+            return {}
+
+        try:
+            with open(data_file, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f) or {}
+            logger.debug(f"Loaded compatibility matrix from {data_file}")
+            return data
         except Exception as e:
-            logger.error(f"Failed to load compatibility matrix: {e}")
+            logger.error(f"Failed to load compatibility matrix from {data_file}: {e}")
             return {}
 
     def _load_addon_data(self) -> Dict[str, Any]:
-        """Load addon version data from YAML file."""
-        try:
-            # Find the data directory relative to this file
-            current_dir = Path(__file__).parent.parent.parent
-            data_file = current_dir / "data" / "addon_versions.yaml"
+        """Load addon version data from the bundled YAML file."""
+        data_file = _find_data_file("addon_versions.yaml")
 
-            if data_file.exists():
-                with open(data_file, "r") as f:
-                    data = yaml.safe_load(f)
-                    logger.debug(f"Loaded addon data from {data_file}")
-                    return data
-            else:
-                logger.warning(f"Addon data file not found: {data_file}")
-                return {}
+        if data_file is None:
+            logger.error(
+                "Bundled data file %s could not be found. The installation looks "
+                "incomplete - reinstall the package, or run from a source checkout.",
+                "addon_versions.yaml",
+            )
+            return {}
+
+        try:
+            with open(data_file, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f) or {}
+            logger.debug(f"Loaded addon version data from {data_file}")
+            return data
         except Exception as e:
-            logger.error(f"Failed to load addon data: {e}")
+            logger.error(f"Failed to load addon version data from {data_file}: {e}")
             return {}
 
     def _build_addon_compatibility(self) -> Dict[str, Dict[str, List[str]]]:

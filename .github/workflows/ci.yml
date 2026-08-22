@@ -75,9 +75,19 @@ jobs:
       run: |
         docker build -t eks-upgrade-planner:test .
     
+    # --help passes even when the bundled data is missing, so exercise a
+    # command that actually has to read it.
     - name: Test Docker image
       run: |
         docker run --rm eks-upgrade-planner:test --help
+        docker run --rm eks-upgrade-planner:test version
+        docker run --rm eks-upgrade-planner:test check-addon \
+          --addon coredns --current v1.11.1-eksbuild.1 --eks-version 1.30 \
+          | tee /tmp/docker-out.txt
+        if grep -qi "not compatible" /tmp/docker-out.txt; then
+          echo "::error::docker image cannot read its bundled data"
+          exit 1
+        fi
 
   package:
     runs-on: ubuntu-latest
@@ -103,6 +113,43 @@ jobs:
     - name: Check package
       run: |
         twine check dist/*
+    
+    # The wheel must carry the YAML data files. Without this the package
+    # installs cleanly and then reports every EKS version as unsupported.
+    - name: Verify data files are in the wheel
+      run: |
+        python - <<'PY'
+        import glob, sys, zipfile
+        wheel = glob.glob("dist/*.whl")[0]
+        names = zipfile.ZipFile(wheel).namelist()
+        required = [
+            "src/data/compatibility_matrix.yaml",
+            "src/data/addon_versions.yaml",
+            "src/config/config.yaml",
+        ]
+        missing = [r for r in required if r not in names]
+        if missing:
+            print("MISSING from wheel:", missing)
+            print("wheel contains:", sorted(names))
+            sys.exit(1)
+        print("all data files present in", wheel)
+        PY
+    
+    # Install the built wheel somewhere with no repository around it and drive
+    # the real CLI. This is what catches a broken data path end to end.
+    - name: Smoke-test the installed package
+      run: |
+        python -m venv /tmp/venv
+        /tmp/venv/bin/pip install --quiet dist/*.whl
+        mkdir -p /tmp/elsewhere && cd /tmp/elsewhere
+        /tmp/venv/bin/eks-upgrade-planner version
+        /tmp/venv/bin/eks-upgrade-planner check-addon \
+          --addon coredns --current v1.11.1-eksbuild.1 --eks-version 1.30 \
+          | tee /tmp/out.txt
+        if grep -qi "not compatible" /tmp/out.txt; then
+          echo "::error::installed package cannot read its bundled data"
+          exit 1
+        fi
     
     - name: Upload artifacts
       uses: actions/upload-artifact@v4

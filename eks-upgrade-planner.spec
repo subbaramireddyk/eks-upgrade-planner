@@ -9,10 +9,10 @@ hiddenimports = collect_submodules('src')
 # Collect data files from src package (YAML config files, etc.)
 datas = collect_data_files('src')
 
-# Add our data and config directories
+# Bundle the YAML at the same package-relative path the loader expects
 datas += [
-    ('data', 'data'),
-    ('config', 'config'),
+    ('src/data', 'src/data'),
+    ('src/config', 'src/config'),
 ]
 
 a = Analysis(

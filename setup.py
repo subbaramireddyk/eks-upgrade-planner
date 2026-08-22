@@ -61,7 +61,7 @@ setup(
         ],
     },
     package_data={
-        "": ["*.yaml", "*.yml"],
+        "src": ["data/*.yaml", "data/*.yml", "config/*.yaml", "config/*.yml"],
     },
     include_package_data=True,
 )

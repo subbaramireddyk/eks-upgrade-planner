@@ -49,4 +49,7 @@ packages = ["src", "src.analyzer", "src.planner", "src.reporter", "src.scanner",
 include-package-data = true
 
 [tool.setuptools.package-data]
-"*" = ["*.yaml", "*.yml"]
+# data/ and config/ live inside the src package so they ship in the wheel.
+# A bare "*.yaml" glob would NOT cover them: package-data globs are relative to
+# a declared package directory, and data/ is a plain subdirectory, not a package.
+"src" = ["data/*.yaml", "data/*.yml", "config/*.yaml", "config/*.yml"]

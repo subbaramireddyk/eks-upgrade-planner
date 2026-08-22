@@ -2,9 +2,9 @@ include README.md
 include LICENSE
 include requirements.txt
 include requirements-dev.txt
-recursive-include data *.yaml *.yml
-recursive-include config *.yaml *.yml
 recursive-include src *.py
+recursive-include src/data *.yaml *.yml
+recursive-include src/config *.yaml *.yml
 recursive-exclude tests *
 recursive-exclude .github *
 recursive-exclude examples *
