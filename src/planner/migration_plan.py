@@ -2,6 +2,7 @@
 
 from typing import Dict, Any, List, Optional
 from src.utils.logger import get_logger
+from src.utils.version import version_at_least
 
 logger = get_logger(__name__)
 
@@ -37,23 +38,18 @@ class MigrationPlanner:
                 deprecation_info = resource.get("deprecation_info", {})
                 removed_in = deprecation_info.get("removed_in", "999.0")
 
-                try:
-                    if float(target_version) >= float(removed_in):
-                        migrations_required.append(
-                            {
-                                "resource_name": resource.get("name"),
-                                "resource_kind": resource.get("kind"),
-                                "namespace": resource.get("namespace"),
-                                "current_api": api_version,
-                                "replacement_api": deprecation_info.get("replacement"),
-                                "migration_notes": deprecation_info.get(
-                                    "migration_notes"
-                                ),
-                                "priority": "CRITICAL",
-                            }
-                        )
-                except ValueError:
-                    pass
+                if version_at_least(target_version, removed_in):
+                    migrations_required.append(
+                        {
+                            "resource_name": resource.get("name"),
+                            "resource_kind": resource.get("kind"),
+                            "namespace": resource.get("namespace"),
+                            "current_api": api_version,
+                            "replacement_api": deprecation_info.get("replacement"),
+                            "migration_notes": deprecation_info.get("migration_notes"),
+                            "priority": "CRITICAL",
+                        }
+                    )
 
         result = {
             "migrations_required": len(migrations_required) > 0,

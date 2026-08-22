@@ -2,6 +2,7 @@
 
 from typing import Dict, Any, List, Optional
 from src.utils.logger import get_logger
+from src.utils.version import version_at_least
 
 logger = get_logger(__name__)
 
@@ -147,11 +148,12 @@ class DeprecationAnalyzer:
         deprecation_info = self.API_DEPRECATIONS[api_version]
         removed_in = deprecation_info.get("removed_in", "999.0")
 
-        try:
-            return float(k8s_version) >= float(removed_in)
-        except ValueError:
+        removed = version_at_least(k8s_version, removed_in)
+        if removed is None:
             logger.warning(f"Invalid version format: {k8s_version}")
             return False
+
+        return removed
 
     def get_deprecation_info(self, api_version: str) -> Optional[Dict[str, Any]]:
         """

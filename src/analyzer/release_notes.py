@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from typing import Dict, Any, List, Optional
 from src.utils.logger import get_logger
 from src.utils.cache import Cache
+from src.utils.version import parse_version
 
 logger = get_logger(__name__)
 
@@ -222,19 +223,19 @@ class ReleaseNotesAnalyzer:
             ],
         }
 
-        # Collect breaking changes for all versions in upgrade path
-        try:
-            from_minor = float(from_version)
-            to_minor = float(to_version)
+        # Collect breaking changes for every version crossed by the upgrade
+        start = parse_version(from_version)
+        end = parse_version(to_version)
 
+        if start is None or end is None:
+            logger.warning("Invalid version format for breaking changes lookup")
+        else:
             for version, changes in known_changes.items():
-                version_minor = float(version)
-                if from_minor < version_minor <= to_minor:
+                crossed = parse_version(version)
+                if crossed is not None and start < crossed <= end:
                     for change in changes:
                         change["affects_version"] = version
                         breaking_changes.append(change)
-        except ValueError:
-            logger.warning("Invalid version format for breaking changes lookup")
 
         logger.info(f"Found {len(breaking_changes)} breaking changes")
         return breaking_changes

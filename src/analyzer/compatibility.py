@@ -4,6 +4,7 @@ import yaml
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
 from src.utils.logger import get_logger
+from src.utils.version import addon_version_at_least, version_sort_key
 
 logger = get_logger(__name__)
 
@@ -277,13 +278,19 @@ class CompatibilityAnalyzer:
             logger.warning(f"No compatibility data for addon {addon_name}")
             return False, None
 
-        compatible_versions = self.ADDON_COMPATIBILITY[eks_version][addon_name]
+        minimum, recommended = self.ADDON_COMPATIBILITY[eks_version][addon_name]
+        recommended = recommended or minimum or None
 
-        # Check if current version is in compatible list
-        is_compatible = any(addon_version in v for v in compatible_versions)
+        # Anything at or above the documented minimum is supported. A substring
+        # match here would reject every version that is not literally the
+        # minimum or the recommended one, including newer ones.
+        is_compatible = addon_version_at_least(addon_version, minimum)
 
-        # Recommend latest version
-        recommended = compatible_versions[-1] if compatible_versions else None
+        if is_compatible is None:
+            logger.warning(
+                f"Could not parse addon version '{addon_version}' for {addon_name}"
+            )
+            return False, recommended
 
         return is_compatible, recommended
 
@@ -402,4 +409,4 @@ class CompatibilityAnalyzer:
         Returns:
             List of supported version strings
         """
-        return sorted(self.EKS_K8S_VERSIONS.keys(), key=lambda x: float(x))
+        return sorted(self.EKS_K8S_VERSIONS.keys(), key=version_sort_key)
