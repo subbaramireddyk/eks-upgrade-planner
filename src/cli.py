@@ -364,7 +364,11 @@ def plan(ctx, cluster, region, profile, target_version, format, output):
         # Output report
         if output:
             output_path = Path(output)
-            output_path.write_text(report)
+            # Reports contain non-ASCII characters. Without an explicit
+            # encoding this uses the locale default, which is cp1252 on most
+            # Windows installs and raises UnicodeEncodeError after all the
+            # scanning work is already done.
+            output_path.write_text(report, encoding="utf-8")
             click.echo(f"{SYMBOLS['success']} Report saved to: {output}")
         else:
             click.echo("\n" + "=" * 80)
@@ -426,8 +430,27 @@ def version(ctx):
     click.echo(f"EKS Upgrade Planner v{__version__}")
 
 
+def _force_utf8_stdio() -> None:
+    """
+    Ensure stdout/stderr can carry the report's non-ASCII characters.
+
+    When output is piped or redirected, Python picks the locale encoding
+    (cp1252 on most Windows installs) and printing the report raises
+    UnicodeEncodeError. Reconfiguring is a no-op on already-UTF-8 streams.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is None:
+            continue
+        try:
+            reconfigure(encoding="utf-8", errors="replace")
+        except (ValueError, OSError):  # detached or unusual stream
+            pass
+
+
 def main():
     """Entry point for CLI."""
+    _force_utf8_stdio()
     cli(obj={})
 
 
